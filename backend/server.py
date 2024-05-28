@@ -79,7 +79,24 @@ def start_serving(addr: Address, contact_node_addr: Address):
 
             return __success_append_entry_response()
 
+        @server.register_function
+        def execute(request):
+            request = json.loads(request)
+
+            logs = [server.instance.election_term, request["command"], request["args"]]
+            server.instance.log.append(logs)
+
+            if request["command"] == "ping":
+                response = {
+                    "status": "success",
+                    "ip": addr.ip,
+                    "port": addr.port,
+                    "message": "pong"
+                }
+                
+                return json.dumps(response)                
             
+
         try:
             server.serve_forever()
         except KeyboardInterrupt:
