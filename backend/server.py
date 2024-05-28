@@ -50,12 +50,6 @@ def start_serving(addr: Address, contact_node_addr: Address):
                 }
             )
 
-        try:
-            server.serve_forever()
-        except KeyboardInterrupt:
-            server.shutdown()
-            os.kill(os.getpid(), signal.SIGTERM)
-
         @server.register_function
         def append_entry(request):
             """ 
@@ -84,6 +78,14 @@ def start_serving(addr: Address, contact_node_addr: Address):
             #     __commit_log(request, addr)
 
             return __success_append_entry_response()
+
+            
+        try:
+            server.serve_forever()
+        except KeyboardInterrupt:
+            server.shutdown()
+            os.kill(os.getpid(), signal.SIGTERM)
+
 
 
 if __name__ == "__main__":

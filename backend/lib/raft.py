@@ -168,12 +168,8 @@ class RaftNode:
             addr = Address(addr["ip"], addr["port"])
 
         node = ServerProxy(f"http://{addr.ip}:{addr.port}")
-        print(node)
         json_request = json.dumps(request)
-        print(request)
-        print(rpc_name)
         rpc_function = getattr(node, rpc_name)
-        print(rpc_function)
         response = {
             "success": False,
         }
