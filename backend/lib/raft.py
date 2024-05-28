@@ -1,5 +1,6 @@
 from lib.struct.AppendEntry   import AppendEntry
 from lib.struct.address       import Address
+from lib.struct.KVStore       import KVStore
 
 import asyncio
 from threading     import Thread
@@ -34,7 +35,7 @@ class RaftNode:
         self.type:                RaftNode.NodeType = RaftNode.NodeType.FOLLOWER
         self.log:                 List[int, str,
                                        str, int] = []  # [term, command, args, request_id]
-        self.app:                 application
+        self.app:                 KVStore =  application
 
         # Election stuff
         self.election_term:       int = 0

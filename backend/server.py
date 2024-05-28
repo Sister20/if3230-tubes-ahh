@@ -94,7 +94,35 @@ def start_serving(addr: Address, contact_node_addr: Address):
                     "message": "pong"
                 }
                 
-                return json.dumps(response)                
+                return json.dumps(response)   
+            elif request["command"] == "set":
+                server.instance.app.put(request["args"]["key"], request["args"]["value"])
+                response = {
+                    "status": "success",
+                    "message": "Key-Value pair added successfully"
+                }
+                return json.dumps(response)      
+            elif request["command"] == "get":
+                value = server.instance.app.get(request["args"])
+                response = {
+                    "status": "success",
+                    "value": value
+                }
+                return json.dumps(response)     
+            elif request["command"] == "append":
+                server.instance.app.append(request["args"]["key"], request["args"]["value"])
+                response = {
+                    "status": "success",
+                    "message": "Value appended successfully"
+                }
+                return json.dumps(response)
+            elif request["command"] == "delete":
+                server.instance.app.delete(request["args"])
+                response = {
+                    "status": "success",
+                    "message": "Key-Value pair deleted successfully"
+                }
+                return json.dumps(response)
             
 
         try:

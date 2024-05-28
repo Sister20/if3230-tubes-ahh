@@ -9,6 +9,12 @@ class KVStore:
 
     def put(self, key, value):
         self.store[key] = value
+    
+    def append(self, key, value):
+        self.store[key] += value
+
+    def strln(self):
+        return str(self.store)
 
     def delete(self, key):
         del self.store[key]
