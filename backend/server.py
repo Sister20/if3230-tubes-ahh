@@ -123,6 +123,12 @@ def start_serving(addr: Address, contact_node_addr: Address):
                     "message": "Key-Value pair deleted successfully"
                 }
                 return json.dumps(response)
+            elif request["command"] == "strln":
+                response = {
+                    "status": "success",
+                    "message": server.instance.app.strln(request["args"])
+                }
+                return json.dumps(response)
             
 
         try:

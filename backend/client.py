@@ -83,6 +83,18 @@ def start_client(client_addr: Address):
             else:
                 print("Failed to delete Key-Value pair")
 
+        elif command_input == 6:
+            request = {
+                "command": "strln",
+                "args": command[1]
+            }
+            response = __send_request(request, "execute", client_addr)
+
+            if (response["status"] == "success"):
+                print("Length of the store: " + response["message"])
+            else:
+                print("Failed to get length of the store")
+
 
 def input_validation(command):
     if command[0] =="exit":
@@ -97,6 +109,8 @@ def input_validation(command):
         return 4
     if command[0] == "delete" and len(command) == 2:
         return 5
+    if command[0] == "strln" and len(command) == 2:
+        return 6
     
     return -1
     
