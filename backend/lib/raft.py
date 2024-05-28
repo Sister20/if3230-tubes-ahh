@@ -4,18 +4,20 @@ from lib.struct.address       import Address
 import asyncio
 from threading     import Thread
 from xmlrpc.client import ServerProxy
-from typing        import Any, List
+from typing        import Any, List, Dict
 from enum          import Enum
 import socket
 import json
 import time
+import aioxmlrpc.client
+import random
 
 
 class RaftNode:
     HEARTBEAT_INTERVAL   = 1
     ELECTION_TIMEOUT_MIN = 2
     ELECTION_TIMEOUT_MAX = 3
-    RPC_TIMEOUT          = 0.5
+    RPC_TIMEOUT          = 5
 
     class NodeType(Enum):
         LEADER    = 1
@@ -23,16 +25,39 @@ class RaftNode:
         FOLLOWER  = 3
 
     def __init__(self, application : Any, addr: Address, contact_addr: Address = None):
+        # ? random float for timeout, called here so in this node, the random float is the same
+        random_float = random.uniform(
+            RaftNode.ELECTION_TIMEOUT_MIN, RaftNode.ELECTION_TIMEOUT_MAX)
         socket.setdefaulttimeout(RaftNode.RPC_TIMEOUT)
-        self.address:             Address           = addr
+        self.leader_id:           int = -1
+        self.address:             Address = addr
         self.type:                RaftNode.NodeType = RaftNode.NodeType.FOLLOWER
-        self.log:                 List[str, str]    = []
-        self.app:                 Any               = application
-        self.election_term:       int               = 0
-        self.cluster_addr_list:   List[Address]     = []
-        self.cluster_leader_addr: Address           = None
+        self.log:                 List[int, str,
+                                       str, int] = []  # [term, command, args, request_id]
+        self.app:                 application
+
+        # Election stuff
+        self.election_term:       int = 0
+        self.election_timeout:    int = time.time(
+        ) + random_float
+        self.election_interval:   int = random_float
+        self.voted_for:           int = -1
+        self.vote_count:          int = 0
+
         self.commit_index:        int = -1
+        self.last_applied:        int = -1
+        self.last_heartbeat_received: int = time.time()
+
+        # Reinit after election
+        self.match_index:         Dict[str, int] = {}
         self.next_index:          Dict[str, int] = {}
+
+        self.cluster_addr_list:   List[Address] = []
+        self.cluster_leader_addr: Address = None
+
+        self.timeout_thread = None
+        self.heartbeat_thread = None
+
         if contact_addr is None:
             self.cluster_addr_list.append(self.address)
             self.__initialize_as_leader()
@@ -130,6 +155,7 @@ class RaftNode:
                 "port": contact_addr.port,
             }
         }
+        print("Applying for membership...")
         redirected_addr = Address(response["address"]["ip"], response["address"]["port"])
         while response.get("status") != "success":
             response        = self.__send_request(self.address, "apply_membership", redirected_addr)
@@ -142,8 +168,12 @@ class RaftNode:
             addr = Address(addr["ip"], addr["port"])
 
         node = ServerProxy(f"http://{addr.ip}:{addr.port}")
+        print(node)
         json_request = json.dumps(request)
+        print(request)
+        print(rpc_name)
         rpc_function = getattr(node, rpc_name)
+        print(rpc_function)
         response = {
             "success": False,
         }
