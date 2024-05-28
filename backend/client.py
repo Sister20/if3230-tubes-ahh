@@ -95,6 +95,18 @@ def start_client(client_addr: Address):
             else:
                 print("Failed to get length of the store")
 
+        elif command_input == 7:
+            request = {
+                "command": "request_log",
+                "args": ""
+            }
+            response = __send_request(request, "execute", client_addr)
+
+            if (response["status"] == "success"):
+                print("Log: " + str(response["message"]))
+            else:
+                print("Failed to get log")
+
 
 def input_validation(command):
     if command[0] =="exit":
@@ -111,6 +123,8 @@ def input_validation(command):
         return 5
     if command[0] == "strln" and len(command) == 2:
         return 6
+    if command[0] == "request_log" and len(command) == 1:
+        return 7
     
     return -1
     

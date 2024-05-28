@@ -129,6 +129,12 @@ def start_serving(addr: Address, contact_node_addr: Address):
                     "message": server.instance.app.strln(request["args"])
                 }
                 return json.dumps(response)
+            elif request["command"] == "request_log":
+                response = {
+                    "status": "success",
+                    "message": server.instance.log
+                }
+                return json.dumps(response)
             
 
         try:
