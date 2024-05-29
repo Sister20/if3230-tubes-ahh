@@ -57,7 +57,7 @@ def start_serving(addr: Address, contact_node_addr: Address):
 
             Should be the follower that receives this
             """
-            print("Received append_entry request from ", request)
+            # print("Received append_entry request from ", request)
             request = json.loads(request)
             addr = Address(request["leader_addr"]["ip"],
                            int(request["leader_addr"]["port"]))
@@ -69,6 +69,8 @@ def start_serving(addr: Address, contact_node_addr: Address):
                 server.instance.type = RaftNode.NodeType.FOLLOWER
     
             server.instance.cluster_leader_addr = addr
+            server.instance._reset_election_timeout()
+            server.instance.cluster_addr_list = request["cluster_addr_list"]
 
             # __heartbeat(request, addr)
             # if len(request["entries"]) != 0:
