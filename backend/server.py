@@ -80,6 +80,33 @@ def start_serving(addr: Address, contact_node_addr: Address):
             #     __commit_log(request, addr)
 
             return __success_append_entry_response()
+        
+        @server.register_function
+        def request_vote(request):
+            """
+            this function will get called via RPC call
+
+            Should be the candidate that receives this
+            """
+            request = json.loads(request)
+            # print("Received request_vote request from ", request)
+            addr = Address(request["candidate_address"]["ip"],
+                           int(request["candidate_address"]["port"]))
+            # if request["term"] < server.instance.election_term:
+            #     return __fail_append_entry_response()
+
+            # if server.instance.type == RaftNode.NodeType.LEADER:
+            #     server.instance.type = RaftNode.NodeType.FOLLOWER
+
+            server.instance.cluster_leader_addr = addr
+            server.instance._reset_election_timeout()
+            server.instance.election_term = request["term"]
+            response = {
+                "status": "success",
+                "term": server.instance.election_term,
+                "vote_granted": True
+            }
+            return json.dumps(response)
 
         @server.register_function
         def execute(request):
