@@ -73,11 +73,18 @@ def start_serving(addr: Address, contact_node_addr: Address):
             server.instance.cluster_addr_list = request["cluster_addr_list"]
 
             # __heartbeat(request, addr)
-            # if len(request["entries"]) != 0:
-            #     __log_replication(request, addr)
+            print("Current log: ", server.instance.log)
+            if len(request["entries"]) != 0:
+                __log_replication(request, addr)
 
             # if request["leader_commit_index"] > server.instance.commit_index:
             #     __commit_log(request, addr)
+
+            return __success_append_entry_response()
+
+        def __log_replication(request, addr):
+            for entry in request["entries"]:
+                server.instance.log.append(entry)
 
             return __success_append_entry_response()
         
