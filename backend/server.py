@@ -1,8 +1,10 @@
+# Import structs
 from lib.struct.address import Address
 from lib.raft          import RaftNode
 from lib.struct.KVStore           import KVStore
 from lib.struct.AppendEntry   import AppendEntry
 
+# Import libraries
 from xmlrpc.server import SimpleXMLRPCServer
 import sys
 import json
@@ -16,14 +18,14 @@ def start_serving(addr: Address, contact_node_addr: Address):
         server.register_introspection_functions()
         server.register_instance(RaftNode(KVStore(), addr, contact_node_addr))
 
-        def __success_append_entry_response():
+        def __success_append_entry_response() -> str:
             response = AppendEntry.Response(
                 server.instance.election_term,
                 True,
             )
             return json.dumps(response.to_dict())
 
-        def __fail_append_entry_response():
+        def __fail_append_entry_response() -> str:
             response = AppendEntry.Response(
                 server.instance.election_term,
                 False,
@@ -31,7 +33,7 @@ def start_serving(addr: Address, contact_node_addr: Address):
             return json.dumps(response.to_dict())
 
         @server.register_function
-        def apply_membership(request):
+        def apply_membership(request) -> str:
             print("Applying for membership... from ", request)
             request = json.loads(request)
             addr = Address(request["ip"], int(request["port"]))
@@ -51,12 +53,7 @@ def start_serving(addr: Address, contact_node_addr: Address):
             )
 
         @server.register_function
-        def append_entry(request):
-            """ 
-            this function will get called via RPC call
-
-            Should be the follower that receives this
-            """
+        def append_entry(request) -> str:
             # print("Received append_entry request from ", request)
             request = json.loads(request)
             addr = Address(request["leader_addr"]["ip"],
@@ -65,8 +62,8 @@ def start_serving(addr: Address, contact_node_addr: Address):
             if request["term"] < server.instance.election_term:
                 return __fail_append_entry_response()
 
-            if server.instance.type == RaftNode.NodeType.CANDIDATE:
-                server.instance.type = RaftNode.NodeType.FOLLOWER
+            if server.instance.type == RaftNode.Type.CANDIDATE:
+                server.instance.type = RaftNode.Type.FOLLOWER
     
             server.instance.cluster_leader_addr = addr
             server.instance._reset_election_timeout()
@@ -90,11 +87,6 @@ def start_serving(addr: Address, contact_node_addr: Address):
         
         @server.register_function
         def request_vote(request):
-            """
-            this function will get called via RPC call
-
-            Should be the candidate that receives this
-            """
             request = json.loads(request)
             # print("Received request_vote request from ", request)
             addr = Address(request["candidate_address"]["ip"],
@@ -102,8 +94,8 @@ def start_serving(addr: Address, contact_node_addr: Address):
             # if request["term"] < server.instance.election_term:
             #     return __fail_append_entry_response()
 
-            # if server.instance.type == RaftNode.NodeType.LEADER:
-            #     server.instance.type = RaftNode.NodeType.FOLLOWER
+            # if server.instance.type == RaftNode.Type.LEADER:
+            #     server.instance.type = RaftNode.Type.FOLLOWER
 
             server.instance.cluster_leader_addr = addr
             server.instance._reset_election_timeout()
@@ -116,7 +108,7 @@ def start_serving(addr: Address, contact_node_addr: Address):
             return json.dumps(response)
 
         @server.register_function
-        def execute(request):
+        def execute(request) -> str:
             request = json.loads(request)
 
             logs = [server.instance.election_term, request["command"], request["args"]]

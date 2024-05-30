@@ -1,5 +1,8 @@
+# Import structs
 from lib.struct.address import Address
 from xmlrpc.client import ServerProxy
+
+# Import libraries
 from typing        import Any, List, Dict
 import json
 import sys
@@ -108,7 +111,7 @@ def start_client(client_addr: Address):
                 print("Failed to get log")
 
 
-def input_validation(command):
+def input_validation(command) -> int:
     if command[0] =="exit":
         return 0
     if command[0] == "ping" and len(command) == 1:
