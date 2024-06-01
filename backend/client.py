@@ -3,7 +3,7 @@ from lib.struct.address import Address
 from xmlrpc.client import ServerProxy
 
 # Import libraries
-from typing        import Any, List, Dict
+from typing import Any
 import json
 import sys
 import traceback
@@ -29,20 +29,20 @@ def start_client(client_addr: Address):
             }
             response = __send_request(request, "execute", client_addr)
 
-            if (response["status"] == "success"):
-                if(response["message"]):
+            if response["status"] == "success":
+                if "message" in response and "ip" in response and "port" in response:
                     print(response["message"] + " from " + response["ip"] + ":" + str(response["port"]))
         elif command_input == 2:
             request = {
                 "command": "set",
-                "args" : {
+                "args": {
                     "key": command[1],
                     "value": command[2]
                 }
             }
             response = __send_request(request, "execute", client_addr)
 
-            if (response["status"] == "success"):
+            if response["status"] == "success":
                 print("Key-Value pair added successfully")
             else:
                 print("Failed to add Key-Value pair")
@@ -54,7 +54,7 @@ def start_client(client_addr: Address):
             }
             response = __send_request(request, "execute", client_addr)
 
-            if (response["status"] == "success"):
+            if response["status"] == "success":
                 print("Value: " + response["value"])
             else:
                 print("Failed to get value")
@@ -69,7 +69,7 @@ def start_client(client_addr: Address):
             }
             response = __send_request(request, "execute", client_addr)
 
-            if (response["status"] == "success"):
+            if response["status"] == "success":
                 print(response["message"])
             else:
                 print("Failed to append value")
@@ -81,7 +81,7 @@ def start_client(client_addr: Address):
             }
             response = __send_request(request, "execute", client_addr)
 
-            if (response["status"] == "success"):
+            if response["status"] == "success":
                 print("Key-Value pair deleted successfully")
             else:
                 print("Failed to delete Key-Value pair")
@@ -93,7 +93,7 @@ def start_client(client_addr: Address):
             }
             response = __send_request(request, "execute", client_addr)
 
-            if (response["status"] == "success"):
+            if response["status"] == "success":
                 print("Length of the store: " + response["message"])
             else:
                 print("Failed to get length of the store")
@@ -105,14 +105,14 @@ def start_client(client_addr: Address):
             }
             response = __send_request(request, "execute", client_addr)
 
-            if (response["status"] == "success"):
+            if response["status"] == "success":
                 print("Log: " + str(response["message"]))
             else:
                 print("Failed to get log")
 
 
 def input_validation(command) -> int:
-    if command[0] =="exit":
+    if command[0] == "exit":
         return 0
     if command[0] == "ping" and len(command) == 1:
         return 1
@@ -128,9 +128,9 @@ def input_validation(command) -> int:
         return 6
     if command[0] == "request_log" and len(command) == 1:
         return 7
-    
+
     return -1
-    
+
 
 def __send_request(request: Any, rpc_name: str, addr: Address) -> "json":
     node = ServerProxy(f"http://{addr.ip}:{addr.port}")
@@ -153,7 +153,8 @@ def __send_request(request: Any, rpc_name: str, addr: Address) -> "json":
             continue
 
     return response
-        
+
+
 if __name__ == "__main__":
     if len(sys.argv) < 3:
         print("client.py <ip> <port>")

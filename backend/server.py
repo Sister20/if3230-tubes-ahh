@@ -74,8 +74,9 @@ def start_serving(addr: Address, contact_node_addr: Address):
             if len(request["entries"]) != 0:
                 __log_replication(request, addr)
 
-            # if request["leader_commit_index"] > server.instance.commit_index:
-            #     __commit_log(request, addr)
+            if request["leader_commit"] > server.instance.commit_index:
+                server.instance.commit_index += 1
+                commit_log(request)
 
             return __success_append_entry_response()
 
@@ -98,8 +99,8 @@ def start_serving(addr: Address, contact_node_addr: Address):
                 }
                 return json.dumps(response)
 
-            # if server.instance.type == RaftNode.Type.LEADER:
-            #     server.instance.type = RaftNode.Type.FOLLOWER
+            if server.instance.type == RaftNode.Type.LEADER:
+                server.instance.type = RaftNode.Type.FOLLOWER
 
             server.instance.cluster_leader_addr = addr
             server.instance._reset_election_timeout()
@@ -117,12 +118,15 @@ def start_serving(addr: Address, contact_node_addr: Address):
 
             logs = [server.instance.election_term, request["command"], request["args"]]
             server.instance.log.append(logs)
-            agree = 0
+            agree = 1
             for addr in server.instance.cluster_addr_list:
                 if addr != server.instance.address:
-                    response = server.instance.append_entries(addr)
-                    if response["success"]:
-                        agree += 1
+                    try :
+                        response = server.instance.append_entries(addr)
+                        if response["success"]:
+                            agree += 1
+                    except:
+                        pass
             if agree >= len(server.instance.cluster_addr_list) // 2:
                 server.instance.commit_index += 1
                 response = commit_log(request)
@@ -143,8 +147,7 @@ def start_serving(addr: Address, contact_node_addr: Address):
                     "ip": addr.ip,
                     "port": addr.port,
                     "message": "pong"
-                }
-                
+                }   
                 return json.dumps(response)   
             elif request["command"] == "set":
                 server.instance.app.put(request["args"]["key"], request["args"]["value"])
