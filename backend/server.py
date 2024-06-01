@@ -80,8 +80,9 @@ def start_serving(addr: Address, contact_node_addr: Address):
             return __success_append_entry_response()
 
         def __log_replication(request, addr):
-            for entry in request["entries"]:
-                server.instance.log.append(entry)
+            if len(server.instance.log) < request["prev_log_index"] + 1:
+                for entry in request["entries"]:
+                    server.instance.log.append(entry)
 
             return __success_append_entry_response()
         
@@ -91,8 +92,11 @@ def start_serving(addr: Address, contact_node_addr: Address):
             # print("Received request_vote request from ", request)
             addr = Address(request["candidate_address"]["ip"],
                            int(request["candidate_address"]["port"]))
-            # if request["term"] < server.instance.election_term:
-            #     return __fail_append_entry_response()
+            if request["term"] < server.instance.election_term:
+                response = {
+                    "status": "failed"
+                }
+                return json.dumps(response)
 
             # if server.instance.type == RaftNode.Type.LEADER:
             #     server.instance.type = RaftNode.Type.FOLLOWER
@@ -113,7 +117,26 @@ def start_serving(addr: Address, contact_node_addr: Address):
 
             logs = [server.instance.election_term, request["command"], request["args"]]
             server.instance.log.append(logs)
+            agree = 0
+            for addr in server.instance.cluster_addr_list:
+                if addr != server.instance.address:
+                    response = server.instance.append_entries(addr)
+                    if response["success"]:
+                        agree += 1
+            if agree >= len(server.instance.cluster_addr_list) // 2:
+                server.instance.commit_index += 1
+                response = commit_log(request)
+                return response
+            
+            else:
+                response = {
+                    "status": "failed",
+                    "message": "Failed to commit log"
+                }
+                return json.dumps(response)
 
+           
+        def commit_log(request):
             if request["command"] == "ping":
                 response = {
                     "status": "success",

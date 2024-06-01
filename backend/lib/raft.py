@@ -69,6 +69,7 @@ class RaftNode:
         # Follower node
         else:
             self.__initialize_as_follower()
+            self.election_term = 0
             self.__try_to_apply_membership(contact_addr)
 
 
@@ -95,7 +96,6 @@ class RaftNode:
     def __initialize_as_follower(self):
         self.__print_log("Initialize as follower node...")
         self.type = RaftNode.Type.FOLLOWER
-        self.election_term = 0
 
         # Election timeout
         self.timeout_thread = Thread(target=asyncio.run,args=[self.__election_timeout()])
@@ -122,7 +122,6 @@ class RaftNode:
                 self.__print_log("Election timeout")
                 self._reset_election_timeout()
                 self.type = RaftNode.Type.CANDIDATE
-                self.__print_log(f"Starting election for term {self.election_term}")
                 await self.__start_election()
                 self.__initialize_as_follower()
                 break
@@ -158,7 +157,7 @@ class RaftNode:
         if prev_log_index >= index:
             request["entries"] = self.log[index + 1:]
             self.__print_log(f"Sending append_entries to {follower_addr} with entries {request['entries']}")
-
+            self.__print_log(self.log)
             # Send request to the follower
             response = self.__send_request(request, "append_entry", follower_addr)
 
@@ -236,7 +235,7 @@ class RaftNode:
             for task in asyncio.as_completed(vote_request_tasks):
                 try:
                     response = await task
-                    if response["vote_granted"]:
+                    if "vote_granted" in response and response["vote_granted"]:
                         self.vote_count += 1
                         self._reset_election_timeout()
                         self.__print_log("+1 Vote granted")
