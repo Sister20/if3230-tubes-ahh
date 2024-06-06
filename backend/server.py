@@ -112,6 +112,7 @@ def start_serving(addr: Address, contact_node_addr: Address):
             }
             return json.dumps(response)
 
+        # TODO: Implementation erdirect leader in this function
         @server.register_function
         def execute(request) -> str:
             request = json.loads(request)
