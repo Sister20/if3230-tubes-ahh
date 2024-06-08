@@ -175,6 +175,7 @@ class RaftNode:
         else:
             response = self.__send_request(request, "append_entry", follower_addr)
 
+        print(response)
         return response
 
 

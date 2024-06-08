@@ -82,7 +82,7 @@ def start_client(client_addr: Address):
             response = __send_request(request, "execute", client_addr)
 
             if response["status"] == "success":
-                print("Key-Value pair deleted successfully")
+                print("ue pair deleted successfully")
             else:
                 print("Failed to delete Key-Value pair")
 
