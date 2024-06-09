@@ -2,7 +2,6 @@
 from lib.struct.address import Address
 from lib.raft          import RaftNode
 from lib.struct.KVStore           import KVStore
-from lib.struct.AppendEntry   import AppendEntry
 
 # Import libraries
 from xmlrpc.server import SimpleXMLRPCServer
@@ -60,9 +59,14 @@ def start_serving(addr: Address, contact_node_addr: Address):
 
             if request["term"] < server.instance.election_term:
                 response = {
-                    "status": "failed",
+                    "status": "late",
                     "term": server.instance.election_term
                 }
+                return json.dumps(response)
+            if request["term"] >= server.instance.election_term:
+                server.instance.election_term = request["term"]
+                server.instance.type = RaftNode.Type.FOLLOWER
+                server.instance.cluster_leader_addr = addr
 
             if server.instance.type == RaftNode.Type.CANDIDATE:
                 server.instance.type = RaftNode.Type.FOLLOWER
@@ -73,7 +77,7 @@ def start_serving(addr: Address, contact_node_addr: Address):
 
             # __heartbeat(request, addr)
             print("Current log: ", server.instance.log)
-            if len(request["entries"]) != 0:
+            if len(request["entries"]) != len(server.instance.log):
                 __log_replication(request, addr)
 
             if request["leader_commit"] > server.instance.commit_index:
@@ -86,14 +90,18 @@ def start_serving(addr: Address, contact_node_addr: Address):
                 commit_log(commit_request)
                 server.instance.commit_index += 1
 
-            return __success_append_entry_response()
+            response = {
+                "status": "success",
+                "term": server.instance.election_term,
+            }
+            return json.dumps(response)
 
         def __log_replication(request, addr):
-            if len(server.instance.log) < request["prev_log_index"] + 1:
-                for entry in request["entries"]:
-                    server.instance.log.append(entry)
+            if len(server.instance.log) < len(request["entries"]):
+                for i in range(len(server.instance.log), len(request["entries"])):
+                    print("Replicating logs")
+                    server.instance.log.append(request["entries"][i])
 
-            return __success_append_entry_response()
         
         @server.register_function
         def request_vote(request):

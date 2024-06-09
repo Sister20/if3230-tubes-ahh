@@ -1,5 +1,4 @@
 # Import structs
-from lib.struct.AppendEntry   import AppendEntry
 from lib.struct.address       import Address
 from lib.struct.KVStore       import KVStore
 
@@ -156,7 +155,7 @@ class RaftNode:
 
         # Check if there are entries to send
         if prev_log_index >= index:
-            request["entries"] = self.log[index + 1:]
+            # request["entries"] = self.log[index + 1:]
             self.__print_log(f"Sending append_entries to {follower_addr} with entries {request['entries']}")
             self.__print_log(self.log)
             # Send request to the follower
@@ -166,7 +165,7 @@ class RaftNode:
             self.match_index.setdefault(str(follower_addr), -1)
 
             # Failed to append entries
-            if not response["success"]:
+            if not response["status"] == "success":
                 if self.next_index[str(follower_addr)] > 0:
                     self.next_index[str(follower_addr)] -= 1
             # Successfully appended entries
@@ -178,7 +177,7 @@ class RaftNode:
         
         if (response["status"] == "success"):
             self.__print_log("Entries appended successfully")
-        elif (response["status"] == "failed"):
+        elif (response["status"] == "late"):
             if (response["term"] > self.election_term):
                 self.rollback()
                 self.election_term = response["term"]
@@ -350,7 +349,7 @@ class RaftNode:
         # TODO : Implement execute
         return json.dumps(request)
 
-    def rollback():
+    def rollback(self):
         #empty log
         self.log = []
         self.commit_index = -1
