@@ -49,8 +49,12 @@
   cursor: pointer;
 }
 
-#sidebar .components .component-list .component.active {
+#sidebar .components .component-list .component.focus {
   color: var(--accent);
+}
+
+#sidebar .components .component-list .component.inactive {
+  color: red;
 }
 
 #sidebar .components .component-list .component:hover {
