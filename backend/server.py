@@ -115,7 +115,14 @@ def start_serving(addr: Address, contact_node_addr: Address):
         @server.register_function
         def execute(request) -> str:
             request = json.loads(request)
-
+            if (server.instance.address.ip != server.instance.cluster_leader_addr.ip) or (server.instance.address.port != server.instance.cluster_leader_addr.port):
+                print("Redirecting to leader")
+                response = {
+                    "status": "redirected",
+                    "ip": server.instance.cluster_leader_addr.ip,
+                    "port": server.instance.cluster_leader_addr.port
+                }
+                return json.dumps(response)
             logs = [server.instance.election_term, request["command"], request["args"]]
             server.instance.log.append(logs)
             agree = 1
