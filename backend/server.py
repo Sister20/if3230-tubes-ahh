@@ -31,18 +31,30 @@ def start_serving(addr: Address, contact_node_addr: Address):
                 False,
             )
             return json.dumps(response.to_dict())
+        
+        def check_membership(addr: Address) -> bool:
+            for cluster_addr in server.instance.cluster_addr_list:
+                print ("KONTOL",cluster_addr)
+                if not isinstance(cluster_addr, Address):
+                    cluster_addr = Address(addr["ip"], addr["port"])
+                if cluster_addr.ip == addr.ip and cluster_addr.port == addr.port:
+                    return True
+            return False
 
         @server.register_function
         def apply_membership(request) -> str:
             print("Applying for membership... from ", request)
             request = json.loads(request)
             addr = Address(request["ip"], int(request["port"]))
+            print(server.instance.cluster_addr_list)
+            if (check_membership(addr) == False):
+                server.instance.cluster_addr_list.append(addr)
+            else:
+                print("Already a member")
 
-            server.instance.cluster_addr_list.append(addr)
-
+            print("SEND RESPONSE")
             server.instance.match_index[str(addr)] = -1
             server.instance.next_index[str(addr)] = -1
-
             return json.dumps(
                 {
                     "status": "success",
@@ -54,7 +66,7 @@ def start_serving(addr: Address, contact_node_addr: Address):
 
         @server.register_function
         def append_entry(request) -> str:
-            # print("Received append_entry request from ", request)
+            print(server.instance.cluster_addr_list[0])
             request = json.loads(request)
             addr = Address(request["leader_addr"]["ip"],
                            int(request["leader_addr"]["port"]))
@@ -127,6 +139,8 @@ def start_serving(addr: Address, contact_node_addr: Address):
             server.instance.log.append(logs)
             agree = 1
             for addr in server.instance.cluster_addr_list:
+                if not isinstance(addr, Address):
+                    addr = Address(addr["ip"], addr["port"])
                 if addr != server.instance.address:
                     try :
                         response = server.instance.append_entries(addr)
