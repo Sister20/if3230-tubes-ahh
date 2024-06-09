@@ -293,7 +293,7 @@ class RaftNode:
         json_request = json.dumps(request)
         rpc_function = getattr(node, rpc_name)
         response = {
-            "success": False,
+            "status": "failed",
         }
 
         try:
