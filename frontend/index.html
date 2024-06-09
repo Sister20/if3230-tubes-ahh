@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="./styles/config.css">
+  <link rel="stylesheet" href="./styles/global.css">
+  <link rel="stylesheet" href="./styles/sidebar.css">
+  <link rel="stylesheet" href="./styles/logs.css">
+  <title>Raft Consensus Protocol</title>
+</head>
+
+<body>
+  <!-- Sidebar -->
+  <section id="sidebar">
+    <div class="components">
+      <h1>Raft Protocol</h1>
+    </div>
+    <!-- Nodes -->
+    <div class="components">
+      <p class="label">NODES</p>
+      <ul id="node-list" class="component-list">
+      </ul>
+    </div>
+  </section>
+
+  <main>
+    <!-- Logs -->
+    <section class="logs-container">
+      <div id="log-msg" class="logs">
+      </div>
+
+      <div class="input-container">
+        <input id="command-input" type="text" placeholder="Enter a command . . .">
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="./scripts/main.js"></script>
+</body>
+
+</html>
