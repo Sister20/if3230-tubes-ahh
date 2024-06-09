@@ -1,88 +1,34 @@
+import { NodeController } from "../controller/NodeController.js";
+import { Node } from "../object/Node.js";
+
 export class NodeModels {
   static _nodes = [];
-  static _focusedNodeId = null;
+  static _focus = null;
 
   static init() {
     NodeModels._nodes = [
-      {
-        id: 1,
-        name: "Node 1",
-        status: "active",
-        port: 3001,
-        focus: true,
-      },
-      {
-        id: 2,
-        name: "Node 2",
-        status: "active",
-        port: 3002,
-        focus: false,
-      },
-      {
-        id: 3,
-        name: "Node 3",
-        status: "active",
-        port: 3003,
-        focus: false,
-      },
-      {
-        id: 4,
-        name: "Node 4",
-        status: "inactive",
-        port: 3004,
-        focus: false,
-      },
-      {
-        id: 5,
-        name: "Node 5",
-        status: "inactive",
-        port: 3005,
-        focus: false,
-      },
-      {
-        id: 6,
-        name: "Node 6",
-        status: "inactive",
-        port: 3006,
-        focus: false,
-      },
-      {
-        id: 7,
-        name: "Node 7",
-        status: "inactive",
-        port: 3007,
-        focus: false,
-      },
-      {
-        id: 8,
-        name: "Node 8",
-        status: "inactive",
-        port: 3008,
-        focus: false,
-      },
-      {
-        id: 9,
-        name: "Node 9",
-        status: "inactive",
-        port: 3009,
-        focus: false,
-      },
-      {
-        id: 10,
-        name: "Node 10",
-        status: "inactive",
-        port: 3010,
-        focus: false,
-      },
+      new Node(1, "Node 1", 3001),
+      new Node(2, "Node 2", 3002),
+      new Node(3, "Node 3", 3003),
+      new Node(4, "Node 4", 3004),
+      new Node(5, "Node 5", 3005),
+      new Node(6, "Node 6", 3006),
+      new Node(7, "Node 7", 3007),
+      new Node(8, "Node 8", 3008),
+      new Node(9, "Node 9", 3009),
+      new Node(10, "Node 10", 3010),
     ];
-    NodeModels._focusedNodeId = 1;
   }
 
   static get nodes() {
-    return this._nodes;
+    return NodeModels._nodes;
   }
 
-  static set focusedNodeId(id) {
-    NodeModels._focusedNodeId = id;
+  static get focus() {
+    return NodeModels._focus;
+  }
+
+  static set focus(node) {
+    NodeModels._focus = node;
   }
 }
