@@ -68,6 +68,7 @@ def start_client(client_addr: Address):
                 }
             }
             response = __send_request(request, "execute", client_addr)
+            print(response)
 
             if response["status"] == "success":
                 print(response["message"])
@@ -139,7 +140,9 @@ def __send_request(request: Any, rpc_name: str, addr: Address) -> "json":
     response = {
         "status": "failed",
         "ip": addr.ip,
-        "port": addr.port
+        "port": addr.port,
+        "message":"success",
+        "value":"success"
     }
     while response["status"] == "failed":
         print("[REQUEST] Sending to server")

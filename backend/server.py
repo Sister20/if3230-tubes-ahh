@@ -1,4 +1,7 @@
 # Import structs
+from typing import Any
+from xmlrpc.client import ServerProxy
+
 from lib.struct.address import Address
 from lib.raft          import RaftNode
 from lib.struct.KVStore           import KVStore
@@ -141,14 +144,9 @@ def start_serving(addr: Address, contact_node_addr: Address):
                     }
                     return json.dumps(response)
             elif server.instance.type == RaftNode.Type.FOLLOWER:
-                logs = [server.instance.election_term, request["command"], request["args"]]
-                server.instance.log.append(logs)
+                response = __send_request(request, "execute", Address(server.instance.cluster_leader_addr["ip"], server.instance.cluster_leader_addr["port"]))
 
-                response = commit_log(request)
-
-                server.instance.append_entries(server.instance.cluster_leader_addr)
-
-                return response
+                return json.dumps(response)
             else:
                 response = {
                     "status": "failed",
@@ -213,6 +211,34 @@ def start_serving(addr: Address, contact_node_addr: Address):
         except KeyboardInterrupt:
             server.shutdown()
             os.kill(os.getpid(), signal.SIGTERM)
+
+def __send_request(request: Any, rpc_name: str, addr: Address) -> "json":
+    if not isinstance(addr, Address):
+        addr = Address(addr["ip"], addr["port"])
+
+    node = ServerProxy(f"http://{addr.ip}:{addr.port}")
+    json_request = json.dumps(request)
+    rpc_function = getattr(node, rpc_name)
+    response = {
+        "status": "success",
+        "ip": addr.ip,
+        "port": addr.port,
+        "message": "",
+        "value": ""
+    }
+
+    try:
+        response = json.loads(rpc_function(json_request))
+        print(response)
+    except KeyboardInterrupt:
+        exit(1)
+    except ConnectionRefusedError:
+        print(f"[{addr}] is not replying (refused, likely down)")
+    except:
+        print(f"[{addr}] is not replying (nack)")
+
+    return response
+
 
 
 
