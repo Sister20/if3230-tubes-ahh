@@ -34,7 +34,6 @@ def start_serving(addr: Address, contact_node_addr: Address):
         
         def check_membership(addr: Address) -> bool:
             for cluster_addr in server.instance.cluster_addr_list:
-                print ("KONTOL",cluster_addr)
                 if not isinstance(cluster_addr, Address):
                     cluster_addr = Address(addr["ip"], addr["port"])
                 if cluster_addr.ip == addr.ip and cluster_addr.port == addr.port:
