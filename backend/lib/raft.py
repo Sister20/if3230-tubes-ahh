@@ -363,4 +363,5 @@ class RaftNode:
         self.vote_count = 1
         self.voted_for = self.address
         self.__initialize_as_follower()
+        self.__try_to_apply_membership(self.cluster_leader_addr)
         self.__print_log("Changed to follower")

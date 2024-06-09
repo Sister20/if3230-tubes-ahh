@@ -73,9 +73,9 @@ def start_serving(addr: Address, contact_node_addr: Address):
                 server.instance.type = RaftNode.Type.FOLLOWER
 
             if server.instance.type == RaftNode.Type.LEADER:
+                server.instance.cluster_leader_addr = addr
                 server.instance.change_to_follower()
             
-                server.instance.cluster_leader_addr = addr
             server.instance.cluster_leader_addr = addr
             server.instance._reset_election_timeout()
             server.instance.cluster_addr_list = request["cluster_addr_list"]
