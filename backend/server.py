@@ -18,19 +18,6 @@ def start_serving(addr: Address, contact_node_addr: Address):
         server.register_introspection_functions()
         server.register_instance(RaftNode(KVStore(), addr, contact_node_addr))
 
-        def __success_append_entry_response() -> str:
-            response = AppendEntry.Response(
-                server.instance.election_term,
-                True,
-            )
-            return json.dumps(response.to_dict())
-
-        def __fail_append_entry_response() -> str:
-            response = AppendEntry.Response(
-                server.instance.election_term,
-                False,
-            )
-            return json.dumps(response.to_dict())
         
         def check_membership(addr: Address) -> bool:
             for cluster_addr in server.instance.cluster_addr_list:
@@ -72,7 +59,10 @@ def start_serving(addr: Address, contact_node_addr: Address):
                            int(request["leader_addr"]["port"]))
 
             if request["term"] < server.instance.election_term:
-                return __fail_append_entry_response()
+                response = {
+                    "status": "failed",
+                    "term": server.instance.election_term
+                }
 
             if server.instance.type == RaftNode.Type.CANDIDATE:
                 server.instance.type = RaftNode.Type.FOLLOWER

@@ -175,6 +175,18 @@ class RaftNode:
                 self.next_index[str(follower_addr)] = prev_log_index
         else:
             response = self.__send_request(request, "append_entry", follower_addr)
+        
+        if (response["status"] == "success"):
+            self.__print_log("Entries appended successfully")
+        elif (response["status"] == "failed"):
+            if (response["term"] > self.election_term):
+                self.rollback()
+                self.election_term = response["term"]
+                self.type = RaftNode.Type.FOLLOWER
+                self.cluster_leader_addr = follower_addr
+                self.__initialize_as_follower()
+                self.__try_to_apply_membership(follower_addr)
+        
 
         return response
 
@@ -337,3 +349,11 @@ class RaftNode:
         request = json.loads(json_request)
         # TODO : Implement execute
         return json.dumps(request)
+
+    def rollback():
+        #empty log
+        self.log = []
+        self.commit_index = -1
+        self.last_applied = -1
+        self.cluster_leader_addr = None
+        self.app.clear()
