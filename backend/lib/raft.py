@@ -356,3 +356,11 @@ class RaftNode:
         self.last_applied = -1
         self.cluster_leader_addr = None
         self.app.clear()
+    
+    def change_to_follower(self):
+        self.type = RaftNode.Type.FOLLOWER
+        self._reset_election_timeout()
+        self.vote_count = 1
+        self.voted_for = self.address
+        self.__initialize_as_follower()
+        self.__print_log("Changed to follower")
