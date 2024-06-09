@@ -19,8 +19,8 @@ import random
 class RaftNode:
     # Timeout and interval constants
     HEARTBEAT_INTERVAL   = 1
-    ELECTION_TIMEOUT_MIN = 3
-    ELECTION_TIMEOUT_MAX = 4
+    ELECTION_TIMEOUT_MIN = 5
+    ELECTION_TIMEOUT_MAX = 10
     RPC_TIMEOUT          = 0.5
 
     # Raft Node types
@@ -133,6 +133,7 @@ class RaftNode:
     def append_entries(self, follower_addr: Address) -> "json":
         # Initialization
         self.last_heartbeat_received = time.time()
+        print(self.cluster_addr_list)
         self._reset_election_timeout()
         prev_log_index = len(self.log) - 1
         prev_log_term = 0
@@ -268,7 +269,8 @@ class RaftNode:
             # Send request to the contact address
             response        = self.__send_request(self.address, "apply_membership", redirected_addr)
         self.log                 = response["log"]
-        self.cluster_addr_list   = response["cluster_addr_list"]
+        for addr in response["cluster_addr_list"]:
+            self.cluster_addr_list.append(Address(addr["ip"], addr["port"]))
         self.cluster_leader_addr = redirected_addr
 
 
