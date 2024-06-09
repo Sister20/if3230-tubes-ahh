@@ -17,7 +17,11 @@ class KVStore:
     
     # Append the value to a key
     def append(self, key, value):
-        self.store[key] += value
+        if key not in self.store:
+            self.store[key] = value
+        else:
+            self.store[key] += value
+            
 
     # Get the length of the value of a key
     def strln(self, key):
