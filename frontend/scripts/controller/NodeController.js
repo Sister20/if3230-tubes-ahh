@@ -31,4 +31,10 @@ export class NodeController {
     NodeView.render();
     LogView.render();
   }
+
+  static updateLog() {
+    NodeModels.nodes.forEach((node) => {
+      node.updateLog();
+    });
+  }
 }

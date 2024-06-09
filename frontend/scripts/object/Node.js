@@ -14,4 +14,19 @@ export class Node {
     this.focus = false;
     this.log = [];
   }
+
+  updateLog() {
+    try {
+      const websocket = new WebSocket(`ws://localhost:8000/log/${this.port}`);
+      this.status = "active";
+      const node = this;
+      websocket.onmessage = function (event) {
+        const data = JSON.parse(event.data);
+        if (data.log) node.log.push(data.log);
+        else if (data.error) node.status = "inactive";
+      };
+    } catch (error) {
+      this.status = "inactive";
+    }
+  }
 }
