@@ -1,0 +1,11 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+
+:root {
+  --surface: #23262e;
+  --surface-variant: #262a33;
+  --surface-container: #2e323c;
+  --accent: #00e8c6;
+  --text-100: #ffffff;
+  --text-500: #999999;
+  --border: #1b1d23;
+}

@@ -1,0 +1,53 @@
+main {
+  height: 100%;
+  padding: 112px 0 60px 0;
+  overflow-y: auto;
+
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+main .logs-container {
+  width: 80%;
+  min-height: 100%;
+
+  max-width: 800px;
+  margin-left: 200px;
+
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-direction: column;
+}
+
+main .logs-container .logs {
+  height: 100%;
+
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  color: var(--text-100);
+}
+
+main .logs-container .input-container {
+  width: 100%;
+}
+
+main .logs-container .input-container #command-input {
+  width: 100%;
+  padding: 16px 16px;
+  background-color: var(--surface);
+  border: 2px solid var(--surface);
+  border-radius: 8px;
+  outline: none;
+
+  color: var(--text-100);
+  font-family: "Poppins", sans-serif;
+  font-size: 1rem;
+}
+
+main .logs-container .input-container #command-input:focus {
+  border: 2px solid var(--accent);
+}
