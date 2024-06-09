@@ -19,8 +19,8 @@ import random
 class RaftNode:
     # Timeout and interval constants
     HEARTBEAT_INTERVAL   = 1
-    ELECTION_TIMEOUT_MIN = 3
-    ELECTION_TIMEOUT_MAX = 4
+    ELECTION_TIMEOUT_MIN = 5
+    ELECTION_TIMEOUT_MAX = 10
     RPC_TIMEOUT          = 0.5
 
     # Raft Node types
