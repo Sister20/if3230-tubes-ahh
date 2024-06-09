@@ -112,43 +112,33 @@ def start_serving(addr: Address, contact_node_addr: Address):
             }
             return json.dumps(response)
 
-        # TODO: Implementation erdirect leader in this function
         @server.register_function
         def execute(request) -> str:
             request = json.loads(request)
-
-            if server.instance.type == RaftNode.Type.LEADER:
-                logs = [server.instance.election_term, request["command"], request["args"]]
-                server.instance.log.append(logs)
-                agree = 1
-                for addr in server.instance.cluster_addr_list:
-                    if addr != server.instance.address:
-                        try :
-                            response = server.instance.append_entries(addr)
-                            if response["success"]:
-                                agree += 1
-                        except:
-                            pass
-                if agree >= len(server.instance.cluster_addr_list) // 2:
-                    server.instance.commit_index += 1
-                    response = commit_log(request)
-                    return response
-
-                else:
-                    response = {
-                        "status": "failed",
-                        "message": "Failed to commit log"
-                    }
-                    return json.dumps(response)
-            elif server.instance.type == RaftNode.Type.FOLLOWER:
-                logs = [server.instance.election_term, request["command"], request["args"]]
-                server.instance.log.append(logs)
-
+            if (server.instance.address.ip != server.instance.cluster_leader_addr.ip) or (server.instance.address.port != server.instance.cluster_leader_addr.port):
+                print("Redirecting to leader")
+                response = {
+                    "status": "redirected",
+                    "ip": server.instance.cluster_leader_addr.ip,
+                    "port": server.instance.cluster_leader_addr.port
+                }
+                return json.dumps(response)
+            logs = [server.instance.election_term, request["command"], request["args"]]
+            server.instance.log.append(logs)
+            agree = 1
+            for addr in server.instance.cluster_addr_list:
+                if addr != server.instance.address:
+                    try :
+                        response = server.instance.append_entries(addr)
+                        if response["success"]:
+                            agree += 1
+                    except:
+                        pass
+            if agree >= len(server.instance.cluster_addr_list) // 2:
+                server.instance.commit_index += 1
                 response = commit_log(request)
-
-                server.instance.append_entries(server.instance.cluster_leader_addr)
-
                 return response
+            
             else:
                 response = {
                     "status": "failed",

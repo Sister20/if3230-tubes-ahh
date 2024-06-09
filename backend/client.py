@@ -32,6 +32,14 @@ def start_client(client_addr: Address):
             if response["status"] == "success":
                 if "message" in response and "ip" in response and "port" in response:
                     print(response["message"] + " from " + response["ip"] + ":" + str(response["port"]))
+            elif response["status"] == "redirected":
+                print("Redirected to " + response["ip"] + ":" + str(response["port"]))
+                response = __send_request(request, "execute", Address(response["ip"], response["port"]))
+                print(response["message"] + " from " + response["ip"] + ":" + str(response["port"]))
+            else:
+                print("Failed to ping")
+
+
         elif command_input == 2:
             request = {
                 "command": "set",
@@ -44,6 +52,10 @@ def start_client(client_addr: Address):
 
             if response["status"] == "success":
                 print("Key-Value pair added successfully")
+            elif response["status"] == "redirected":
+                print("Redirected to " + response["ip"] + ":" + str(response["port"]))
+                response = __send_request(request, "execute", Address(response["ip"], response["port"]))
+                print(response["message"])
             else:
                 print("Failed to add Key-Value pair")
 
@@ -55,6 +67,10 @@ def start_client(client_addr: Address):
             response = __send_request(request, "execute", client_addr)
 
             if response["status"] == "success":
+                print("Value: " + response["value"])
+            elif response["status"] == "redirected":
+                print("Redirected to " + response["ip"] + ":" + str(response["port"]))
+                response = __send_request(request, "execute", Address(response["ip"], response["port"]))
                 print("Value: " + response["value"])
             else:
                 print("Failed to get value")
@@ -71,6 +87,10 @@ def start_client(client_addr: Address):
 
             if response["status"] == "success":
                 print(response["message"])
+            elif response["status"] == "redirected":
+                print("Redirected to " + response["ip"] + ":" + str(response["port"]))
+                response = __send_request(request, "execute", Address(response["ip"], response["port"]))
+                print(response["message"])
             else:
                 print("Failed to append value")
 
@@ -82,7 +102,11 @@ def start_client(client_addr: Address):
             response = __send_request(request, "execute", client_addr)
 
             if response["status"] == "success":
-                print("ue pair deleted successfully")
+                print("Key-Value pair deleted successfully")
+            elif response["status"] == "redirected":
+                print("Redirected to " + response["ip"] + ":" + str(response["port"]))
+                response = __send_request(request, "execute", Address(response["ip"], response["port"]))
+                print(response["message"])
             else:
                 print("Failed to delete Key-Value pair")
 
@@ -95,6 +119,10 @@ def start_client(client_addr: Address):
 
             if response["status"] == "success":
                 print("Length of the store: " + response["message"])
+            elif response["status"] == "redirected":
+                print("Redirected to " + response["ip"] + ":" + str(response["port"]))
+                response = __send_request(request, "execute", Address(response["ip"], response["port"]))
+                print("Length of the store: " + response["message"])
             else:
                 print("Failed to get length of the store")
 
@@ -106,6 +134,10 @@ def start_client(client_addr: Address):
             response = __send_request(request, "execute", client_addr)
 
             if response["status"] == "success":
+                print("Log: " + str(response["message"]))
+            elif response["status"] == "redirected":
+                print("Redirected to " + response["ip"] + ":" + str(response["port"]))
+                response = __send_request(request, "execute", Address(response["ip"], response["port"]))
                 print("Log: " + str(response["message"]))
             else:
                 print("Failed to get log")
@@ -145,6 +177,7 @@ def __send_request(request: Any, rpc_name: str, addr: Address) -> "json":
         print("[REQUEST] Sending to server")
         try:
             response = json.loads(rpc_function(json_request))
+            print("[RESPONSE] Received from server")
         except KeyboardInterrupt:
             break
         except:
